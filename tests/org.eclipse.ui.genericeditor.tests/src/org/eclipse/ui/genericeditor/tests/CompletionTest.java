@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -83,7 +82,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 
 	private Shell completionShell;
 
-	@Test
+	@RepeatedTest(50)
 	public void testCompletion() throws Exception {
 		editor.selectAndReveal(3, 0);
 		Shell shell = openContentAssistWithLongRunningProposalComputation();
@@ -95,7 +94,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 		// beer.", ((StyledText)editor.getAdapter(Control.class)).getText());
 	}
 
-	@Test
+	@RepeatedTest(50)
 	public void testDefaultContentAssistBug570488() throws Exception {
 		ILog log= ILog.of(Platform.getBundle("org.eclipse.jface.text"));
 		TestLogListener listener= new TestLogListener();
@@ -107,7 +106,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 		log.removeLogListener(listener);
 	}
 
-	@Test
+	@RepeatedTest(50)
 	public void testCompletionService() throws Exception {
 		Bundle bundle= FrameworkUtil.getBundle(CompletionTest.class);
 		assertNotNull(bundle);
@@ -125,7 +124,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 		registration.unregister();
 	}
 
-	@Test
+	@RepeatedTest(50)
 	public void testCompletionUsingViewerSelection() throws Exception {
 		editor.getDocumentProvider().getDocument(editor.getEditorInput()).set("abc");
 		editor.selectAndReveal(0, 3);
@@ -146,7 +145,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 				+ Arrays.toString(completionProposalList.getItems()));
 	}
 
-	@Test
+	@RepeatedTest(50)
 	public void testEnabledWhenCompletion() throws Exception {
 		// Confirm that when disabled, a completion shell is not present
 		EnabledPropertyTester.setEnabled(false);
@@ -241,7 +240,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 		return afterShells.isEmpty() ? null : afterShells.get(0);
 	}
 
-	@Test
+	@RepeatedTest(50)
 	public void testCompletionFreeze_bug521484() throws Exception {
 		editor.selectAndReveal(3, 0);
 		final Shell shell = openContentAssistWithLongRunningProposalComputation();
@@ -258,7 +257,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 				"UI Thread frozen for " + processingDuration + "ms");
 	}
 
-	@RepeatedTest(200)
+	@RepeatedTest(50)
 	public void testMoveCaretBackUsesAllProcessors_bug522255() throws Exception {
 		editor.selectAndReveal(3, 0);
 		Shell shell = openContentAssistWithLongRunningProposalComputation();
