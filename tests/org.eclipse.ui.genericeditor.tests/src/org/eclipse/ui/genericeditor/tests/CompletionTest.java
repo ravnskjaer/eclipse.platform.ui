@@ -47,10 +47,12 @@ import org.osgi.framework.ServiceRegistration;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ST;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
@@ -236,10 +238,42 @@ public class CompletionTest extends AbstratGenericEditorTest {
 				.filter(Shell::isVisible)
 				.filter(shell -> !beforeShells.contains(shell))
 				.toList();
-		assertTrue(afterShells.size() <= 1, "More than one new shell was found");
+		assertTrue(afterShells.size() <= 1,
+				() -> "More than one new shell was found:" + describeShells(afterShells));
 		return afterShells.isEmpty() ? null : afterShells.get(0);
 	}
 
+	private static String describeShells(List<Shell> shells) {
+		StringBuilder sb = new StringBuilder();
+		for (Shell s : shells) {
+			sb.append("\n- ").append(s.getClass().getName())
+					.append(" text='").append(s.getText()).append('\'')
+					.append(" data=").append(s.getData())
+					.append(" parent=").append(s.getParent())
+					.append(" bounds=").append(s.getBounds())
+					.append(" active=").append(s == s.getDisplay().getActiveShell());
+			appendChildren(sb, s, "    ");
+		}
+		return sb.toString();
+	}
+
+	private static void appendChildren(StringBuilder sb, Composite parent, String indent) {
+		for (Control child : parent.getChildren()) {
+			sb.append('\n').append(indent).append(child.getClass().getSimpleName());
+			if (child instanceof Table table) {
+				for (TableItem item : table.getItems()) {
+					sb.append(" [").append(item.getText()).append(']');
+				}
+			} else if (child instanceof StyledText text) {
+				sb.append(" '").append(text.getText()).append('\'');
+			} else if (child instanceof Label label) {
+				sb.append(" '").append(label.getText()).append('\'');
+			}
+			if (child instanceof Composite composite) {
+				appendChildren(sb, composite, indent + "  ");
+			}
+		}
+	}
 	@RepeatedTest(50)
 	public void testCompletionFreeze_bug521484() throws Exception {
 		editor.selectAndReveal(3, 0);
