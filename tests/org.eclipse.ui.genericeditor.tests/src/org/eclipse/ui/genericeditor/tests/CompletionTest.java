@@ -239,7 +239,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 				.filter(shell -> !beforeShells.contains(shell))
 				.toList();
 		assertTrue(afterShells.size() <= 1,
-				() -> "More than one new shell was found:" + describeShells(afterShells));
+				() -> "Expected at most one new shell, found " + afterShells.size() + ":" + describeShells(afterShells));
 		return afterShells.isEmpty() ? null : afterShells.get(0);
 	}
 
@@ -291,7 +291,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 				"UI Thread frozen for " + processingDuration + "ms");
 	}
 
-	@RepeatedTest(100)
+	@RepeatedTest(200)
 	public void testMoveCaretBackUsesAllProcessors_bug522255() throws Exception {
 		editor.selectAndReveal(3, 0);
 		Shell shell = openContentAssistWithLongRunningProposalComputation();
