@@ -39,9 +39,7 @@ import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.RepeatedTest;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -49,10 +47,12 @@ import org.osgi.framework.ServiceRegistration;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ST;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
@@ -84,8 +84,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 
 	private Shell completionShell;
 
-	@Test
-	@DisabledOnOs(value = OS.MAC, disabledReason = "test fails on Mac, see https://github.com/eclipse-platform/eclipse.platform.ui/issues/906")
+	@RepeatedTest(50)
 	public void testCompletion() throws Exception {
 		editor.selectAndReveal(3, 0);
 		Shell shell = openContentAssistWithLongRunningProposalComputation();
@@ -97,7 +96,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 		// beer.", ((StyledText)editor.getAdapter(Control.class)).getText());
 	}
 
-	@Test
+	@RepeatedTest(50)
 	public void testDefaultContentAssistBug570488() throws Exception {
 		ILog log= ILog.of(Platform.getBundle("org.eclipse.jface.text"));
 		TestLogListener listener= new TestLogListener();
@@ -109,8 +108,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 		log.removeLogListener(listener);
 	}
 
-	@Test
-	@DisabledOnOs(value = OS.MAC, disabledReason = "test fails on Mac, see https://github.com/eclipse-platform/eclipse.platform.ui/issues/906")
+	@RepeatedTest(50)
 	public void testCompletionService() throws Exception {
 		Bundle bundle= FrameworkUtil.getBundle(CompletionTest.class);
 		assertNotNull(bundle);
@@ -128,8 +126,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 		registration.unregister();
 	}
 
-	@Test
-	@DisabledOnOs(value = OS.MAC, disabledReason = "test fails on Mac, see https://github.com/eclipse-platform/eclipse.platform.ui/issues/906")
+	@RepeatedTest(50)
 	public void testCompletionUsingViewerSelection() throws Exception {
 		editor.getDocumentProvider().getDocument(editor.getEditorInput()).set("abc");
 		editor.selectAndReveal(0, 3);
@@ -150,7 +147,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 				+ Arrays.toString(completionProposalList.getItems()));
 	}
 
-	@Test
+	@RepeatedTest(50)
 	public void testEnabledWhenCompletion() throws Exception {
 		// Confirm that when disabled, a completion shell is not present
 		EnabledPropertyTester.setEnabled(false);
@@ -241,12 +238,43 @@ public class CompletionTest extends AbstratGenericEditorTest {
 				.filter(Shell::isVisible)
 				.filter(shell -> !beforeShells.contains(shell))
 				.toList();
-		assertTrue(afterShells.size() <= 1, "More than one new shell was found");
+		assertTrue(afterShells.size() <= 1,
+				() -> "Expected at most one new shell, found " + afterShells.size() + ":" + describeShells(afterShells));
 		return afterShells.isEmpty() ? null : afterShells.get(0);
 	}
 
-	@Test
-	@DisabledOnOs(value = OS.MAC, disabledReason = "test fails on Mac, see https://github.com/eclipse-platform/eclipse.platform.ui/issues/906")
+	private static String describeShells(List<Shell> shells) {
+		StringBuilder sb = new StringBuilder();
+		for (Shell s : shells) {
+			sb.append("\n- ").append(s.getClass().getName())
+					.append(" text='").append(s.getText()).append('\'')
+					.append(" data=").append(s.getData())
+					.append(" parent=").append(s.getParent())
+					.append(" bounds=").append(s.getBounds())
+					.append(" active=").append(s == s.getDisplay().getActiveShell());
+			appendChildren(sb, s, "    ");
+		}
+		return sb.toString();
+	}
+
+	private static void appendChildren(StringBuilder sb, Composite parent, String indent) {
+		for (Control child : parent.getChildren()) {
+			sb.append('\n').append(indent).append(child.getClass().getSimpleName());
+			if (child instanceof Table table) {
+				for (TableItem item : table.getItems()) {
+					sb.append(" [").append(item.getText()).append(']');
+				}
+			} else if (child instanceof StyledText text) {
+				sb.append(" '").append(text.getText()).append('\'');
+			} else if (child instanceof Label label) {
+				sb.append(" '").append(label.getText()).append('\'');
+			}
+			if (child instanceof Composite composite) {
+				appendChildren(sb, composite, indent + "  ");
+			}
+		}
+	}
+	@RepeatedTest(50)
 	public void testCompletionFreeze_bug521484() throws Exception {
 		editor.selectAndReveal(3, 0);
 		final Shell shell = openContentAssistWithLongRunningProposalComputation();
@@ -263,8 +291,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 				"UI Thread frozen for " + processingDuration + "ms");
 	}
 
-	@Test
-	@DisabledOnOs(value = OS.MAC, disabledReason = "test fails on Mac, see https://github.com/eclipse-platform/eclipse.platform.ui/issues/906")
+	@RepeatedTest(300)
 	public void testMoveCaretBackUsesAllProcessors_bug522255() throws Exception {
 		editor.selectAndReveal(3, 0);
 		Shell shell = openContentAssistWithLongRunningProposalComputation();
