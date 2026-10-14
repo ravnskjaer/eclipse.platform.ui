@@ -291,7 +291,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 				"UI Thread frozen for " + processingDuration + "ms");
 	}
 
-	@RepeatedTest(200)
+	@RepeatedTest(300)
 	public void testMoveCaretBackUsesAllProcessors_bug522255() throws Exception {
 		editor.selectAndReveal(3, 0);
 		Shell shell = openContentAssistWithLongRunningProposalComputation();
