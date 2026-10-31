@@ -39,6 +39,7 @@ import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -82,7 +83,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 
 	private Shell completionShell;
 
-	@Test
+	@RepeatedTest(50)
 	public void testCompletion() throws Exception {
 		editor.selectAndReveal(3, 0);
 		Shell shell = openContentAssistWithLongRunningProposalComputation();
@@ -106,7 +107,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 		log.removeLogListener(listener);
 	}
 
-	@Test
+	@RepeatedTest(50)
 	public void testCompletionService() throws Exception {
 		Bundle bundle= FrameworkUtil.getBundle(CompletionTest.class);
 		assertNotNull(bundle);
@@ -124,7 +125,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 		registration.unregister();
 	}
 
-	@Test
+	@RepeatedTest(50)
 	public void testCompletionUsingViewerSelection() throws Exception {
 		editor.getDocumentProvider().getDocument(editor.getEditorInput()).set("abc");
 		editor.selectAndReveal(0, 3);
@@ -249,7 +250,7 @@ public class CompletionTest extends AbstratGenericEditorTest {
 		return topLevelNewShells.isEmpty() ? null : topLevelNewShells.get(0);
 	}
 
-	@Test
+	@RepeatedTest(50)
 	public void testCompletionFreeze_bug521484() throws Exception {
 		editor.selectAndReveal(3, 0);
 		final Shell shell = openContentAssistWithLongRunningProposalComputation();
